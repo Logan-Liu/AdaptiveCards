@@ -1,0 +1,70 @@
+variables:
+  buildAllArches: false
+
+trigger:
+  branches:
+    include:
+    - main
+    - feature/*
+    - release/2*
+  batch: True
+
+name: $(date:yyMM).$(date:dd)$(rev:rrr)
+
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: main
+
+stages:
+- stage: Build_PR
+  displayName: Build arches for PR validation
+  dependsOn: []
+  condition: succeeded()
+  jobs:
+  - job: Phase_1
+    strategy:
+      matrix:
+        Arch_x86:
+          buildPlatform: x86
+        Arch_x64:
+          buildPlatform: x64
+    displayName: Build
+    timeoutInMinutes: 100
+    cancelTimeoutInMinutes: 1
+    pool:
+      name: Package ES Standard Build
+    steps:
+    - template: ./templates/build-specific-platform.yml
+      parameters:
+        platform: $(buildPlatform)
+- stage: Build_Release
+  displayName: Build arches for release
+  dependsOn: []
+  condition: or(variables['buildAllArches'], and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
+  jobs:
+  - job: Build_Bits
+    strategy:
+      matrix:
+        Arch_ARM:
+          BuildPlatform: ARM
+        Arch_ARM64:
+          BuildPlatform: ARM64
+    displayName: Build
+    timeoutInMinutes: 100
+    cancelTimeoutInMinutes: 1
+    pool:
+      name: Package ES Standard Build
+    steps:
+    - template: ./templates/build-specific-platform.yml
+      parameters:
+        platform: $(buildPlatform)
+- stage: Package
+  dependsOn: [ Build_PR, Build_Release ]
+  condition: or(variables['buildAllArches'], and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
+  displayName: Bundle Nuget Package
+  jobs:
+  - job: PackageJob
+    steps:
+    - script: echo Packaging!
