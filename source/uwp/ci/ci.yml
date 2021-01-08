@@ -62,8 +62,10 @@ stages:
         platform: $(buildPlatform)
 - stage: Package
   dependsOn: [ Build_PR, Build_Release ]
-  condition: or(variables['buildAllArches'], and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
+  condition: and(succeeded(), or(variables['buildAllArches'], and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
   displayName: Bundle Nuget Package
+  pool:
+    name: Package ES Standard Build
   jobs:
   - job: PackageJob
     steps:
