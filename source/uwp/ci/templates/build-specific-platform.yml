@@ -2,7 +2,6 @@
 parameters:
   configuration: 'Release'
   platform: ''
-  additionalBuildArguments: ''
 
 jobs:
 - job: Build${{ parameters.platform }}${{ parameters.configuration }}
