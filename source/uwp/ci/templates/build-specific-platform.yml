@@ -15,7 +15,7 @@ steps:
   name: NuGetCommand2
   displayName: NuGet restore source/uwp/AdaptiveCards.sln
   inputs:
-    solution: $(solution)
+    solution: source/uwp/AdaptiveCards.sln
     verbosity: '-'
 - task: VSBuild@1
   name: VSBuild3
