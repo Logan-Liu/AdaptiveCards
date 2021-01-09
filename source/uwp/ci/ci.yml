@@ -1,6 +1,3 @@
-variables:
-  buildAllArches: false
-
 trigger:
   branches:
     include:
