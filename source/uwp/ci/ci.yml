@@ -35,7 +35,7 @@ stages:
     steps:
     - template: ./templates/build-specific-platform.yml
       parameters:
-        platform: $(buildPlatform)
+        platform: ${{ buildPlatform }}
 - stage: Build_Release
   displayName: Build arches for release
   dependsOn: []
@@ -45,9 +45,9 @@ stages:
     strategy:
       matrix:
         Arch_ARM:
-          BuildPlatform: ARM
+          buildPlatform: ARM
         Arch_ARM64:
-          BuildPlatform: ARM64
+          buildPlatform: ARM64
     displayName: Build
     timeoutInMinutes: 100
     cancelTimeoutInMinutes: 1
