@@ -84,4 +84,4 @@ stages:
   jobs:
   - job: PackageJob
     steps:
-    - script: echo Packaging!
+    - template: ./templates/bundle-uwp-nuget-package.yml
