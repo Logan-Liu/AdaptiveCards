@@ -31,7 +31,7 @@ steps:
     logFileVerbosity: detailed
 - task: CopyFiles@2
   displayName: Copy binaries for NuGet (x86)
-  condition: and(succeeded(), eq(variables['${{ parameters.platform }}'], 'x86'), ne(variables['Build.Reason'], 'PullRequest'))
+  condition: and(succeeded(), eq("${{ parameters.platform }}", 'x86'), ne(variables['Build.Reason'], 'PullRequest'))
   inputs:
     SourceFolder: $(Build.SourcesDirectory)/source/uwp/Release/AdaptiveCardRenderer/
     Contents: AdaptiveCards.Rendering.Uwp.*
@@ -39,7 +39,7 @@ steps:
     OverWrite: true
 - task: CopyFiles@2
   displayName: Copy binaries for NuGet (ARM | x64)
-  condition: and(succeeded(), not(eq(variables['${{ parameters.platform }}'], 'x86')), ne(variables['Build.Reason'], 'PullRequest'))
+  condition: and(succeeded(), not(eq("${{ parameters.platform }}", 'x86')), ne(variables['Build.Reason'], 'PullRequest'))
   inputs:
     SourceFolder: $(Build.SourcesDirectory)/source/uwp/${{ parameters.platform }}/Release/AdaptiveCardRenderer/
     Contents: AdaptiveCards.Rendering.Uwp.*
