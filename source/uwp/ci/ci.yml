@@ -15,18 +15,12 @@ resources:
     ref: main
 
 stages:
-- stage: Build_PR
-  displayName: Build arches for PR validation
+- stage: Build_x86
+  displayName: Build x86
   dependsOn: []
   condition: succeeded()
   jobs:
   - job: Phase_1
-    strategy:
-      matrix:
-        Arch_x86:
-          buildPlatform: x86
-        Arch_x64:
-          buildPlatform: x64
     displayName: Build
     timeoutInMinutes: 100
     cancelTimeoutInMinutes: 1
@@ -35,19 +29,28 @@ stages:
     steps:
     - template: ./templates/build-specific-platform.yml
       parameters:
-        platform: $[ buildPlatform ]
-- stage: Build_Release
-  displayName: Build arches for release
+        platform: x86
+- stage: Build_x64
+  displayName: Build x64
+  dependsOn: []
+  condition: succeeded()
+  jobs:
+  - job: Phase_1
+    displayName: Build
+    timeoutInMinutes: 100
+    cancelTimeoutInMinutes: 1
+    pool:
+      name: Package ES Standard Build
+    steps:
+    - template: ./templates/build-specific-platform.yml
+      parameters:
+        platform: x64
+- stage: Build_ARM
+  displayName: Build ARM
   dependsOn: []
   condition: or(variables['buildAllArches'], and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
   jobs:
   - job: Build_Bits
-    strategy:
-      matrix:
-        Arch_ARM:
-          buildPlatform: ARM
-        Arch_ARM64:
-          buildPlatform: ARM64
     displayName: Build
     timeoutInMinutes: 100
     cancelTimeoutInMinutes: 1
@@ -56,9 +59,24 @@ stages:
     steps:
     - template: ./templates/build-specific-platform.yml
       parameters:
-        platform: $[ buildPlatform ]
+        platform: ARM
+- stage: Build_ARM64
+  displayName: Build ARM64
+  dependsOn: []
+  condition: or(variables['buildAllArches'], and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2')))
+  jobs:
+  - job: Build_Bits
+    displayName: Build
+    timeoutInMinutes: 100
+    cancelTimeoutInMinutes: 1
+    pool:
+      name: Package ES Standard Build
+    steps:
+    - template: ./templates/build-specific-platform.yml
+      parameters:
+        platform: ARM64
 - stage: Package
-  dependsOn: [ Build_PR, Build_Release ]
+  dependsOn: [ Build_x86, Build_x64, Build_ARM, Build_ARM64 ]
   condition: and(succeeded(), or(variables['buildAllArches'], and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2'))))
   displayName: Bundle Nuget Package
   pool:
