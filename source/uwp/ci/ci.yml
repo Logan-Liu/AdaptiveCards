@@ -35,7 +35,7 @@ stages:
     steps:
     - template: ./templates/build-specific-platform.yml
       parameters:
-        platform: ${{ buildPlatform }}
+        platform: $[ buildPlatform ]
 - stage: Build_Release
   displayName: Build arches for release
   dependsOn: []
@@ -56,7 +56,7 @@ stages:
     steps:
     - template: ./templates/build-specific-platform.yml
       parameters:
-        platform: $(buildPlatform)
+        platform: $[ buildPlatform ]
 - stage: Package
   dependsOn: [ Build_PR, Build_Release ]
   condition: and(succeeded(), or(variables['buildAllArches'], and(ne(variables['Build.Reason'], 'PullRequest'), startsWith(variables['Build.Branch'], 'release/2'))))
