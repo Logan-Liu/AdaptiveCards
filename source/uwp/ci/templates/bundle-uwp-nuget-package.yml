@@ -6,61 +6,60 @@ steps:
   - checkout: self
     clean: true
     fetchDepth: 1
-    steps:
-    - task: NuGetToolInstaller@0
-      name: NuGetToolInstaller1
-      displayName: Use NuGet 5.x
-      inputs:
-        versionSpec: 5.x
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Pipeline Artifact (x86)'
-      inputs:
-        artifactName: 'drop-x86-$(BuildConfiguration)'
-        targetPath: '$(Build.ArtifactStagingDirectory)/drop-x86-$(BuildConfiguration)'
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Pipeline Artifact (x64)'
-      inputs:
-        artifactName: 'drop-x64-$(BuildConfiguration)'
-        targetPath: '$(Build.ArtifactStagingDirectory)/drop-x64-$(BuildConfiguration)'
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Pipeline Artifact (ARM)'
-      inputs:
-        artifactName: 'drop-ARM-$(BuildConfiguration)'
-        targetPath: '$(Build.ArtifactStagingDirectory)/drop-ARM-$(BuildConfiguration)'
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Pipeline Artifact (ARM64)'
-      inputs:
-        artifactName: 'drop-ARM64-$(BuildConfiguration)'
-        targetPath: '$(Build.ArtifactStagingDirectory)/drop-ARM64-$(BuildConfiguration)'
-    - powershell: Write-Host "##vso[task.setvariable variable=FullBuildVersion;]$($env:XES_SEMANTICVERSION)"
-      displayName: 'Set Version information for Nuget'
-    - task: NuGetCommand@2
-      displayName: 'NuGet pack'
-      inputs:
-        command: pack
-        packagesToPack: source/uwp/NuGet/AdaptiveCards.Rendering.Uwp.nuspec
-        versioningScheme: byEnvVar
-        versionEnvVar: FullBuildVersion
-        steps:
-    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-      displayName: Component Detection
-    - task: NuGetCommand@2
-      displayName: 'NuGet push'
-      condition: and(succeeded(), ${{ performNugetPush }}))    
-      inputs:
-        command: push
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/signed/*.nupkg;!$(Build.ArtifactStagingDirectory)/signed/*.symbols.nupkg'
-        nuGetFeedType: external
-        publishFeedCredentials: 'NuGet.org (AdaptiveCards)'
-    - task: PowerShell@1
-      displayName: 'Git tag the release'
-      condition: and(succeeded(), ${{ performNugetPush }}))    
-      inputs:
-        scriptType: inlineScript
-        inlineScript: |
-          Import-Module $env:BUILD_SOURCESDIRECTORY\scripts\AdaptiveCards.Build.psm1
-          Invoke-TagRelease uwp $env:FullBuildVersion
-        failOnStandardError: false
-    - publish: $(Build.ArtifactStagingDirectory)/nuget
-      displayName: 'Pipeline publish NuGet package'
-      artifact: 'nupkg-$(BuildConfiguration)'
+  - task: NuGetToolInstaller@0
+    name: NuGetToolInstaller1
+    displayName: Use NuGet 5.x
+    inputs:
+      versionSpec: 5.x
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Pipeline Artifact (x86)'
+    inputs:
+      artifactName: 'drop-x86-$(BuildConfiguration)'
+      targetPath: '$(Build.ArtifactStagingDirectory)/drop-x86-$(BuildConfiguration)'
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Pipeline Artifact (x64)'
+    inputs:
+      artifactName: 'drop-x64-$(BuildConfiguration)'
+      targetPath: '$(Build.ArtifactStagingDirectory)/drop-x64-$(BuildConfiguration)'
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Pipeline Artifact (ARM)'
+    inputs:
+      artifactName: 'drop-ARM-$(BuildConfiguration)'
+      targetPath: '$(Build.ArtifactStagingDirectory)/drop-ARM-$(BuildConfiguration)'
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Pipeline Artifact (ARM64)'
+    inputs:
+      artifactName: 'drop-ARM64-$(BuildConfiguration)'
+      targetPath: '$(Build.ArtifactStagingDirectory)/drop-ARM64-$(BuildConfiguration)'
+  - powershell: Write-Host "##vso[task.setvariable variable=FullBuildVersion;]$($env:XES_SEMANTICVERSION)"
+    displayName: 'Set Version information for Nuget'
+  - task: NuGetCommand@2
+    displayName: 'NuGet pack'
+    inputs:
+      command: pack
+      packagesToPack: source/uwp/NuGet/AdaptiveCards.Rendering.Uwp.nuspec
+      versioningScheme: byEnvVar
+      versionEnvVar: FullBuildVersion
+      steps:
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: Component Detection
+  - task: NuGetCommand@2
+    displayName: 'NuGet push'
+    condition: and(succeeded(), ${{ performNugetPush }}))    
+    inputs:
+      command: push
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/signed/*.nupkg;!$(Build.ArtifactStagingDirectory)/signed/*.symbols.nupkg'
+      nuGetFeedType: external
+      publishFeedCredentials: 'NuGet.org (AdaptiveCards)'
+  - task: PowerShell@1
+    displayName: 'Git tag the release'
+    condition: and(succeeded(), ${{ performNugetPush }}))    
+    inputs:
+      scriptType: inlineScript
+      inlineScript: |
+        Import-Module $env:BUILD_SOURCESDIRECTORY\scripts\AdaptiveCards.Build.psm1
+        Invoke-TagRelease uwp $env:FullBuildVersion
+      failOnStandardError: false
+  - publish: $(Build.ArtifactStagingDirectory)/nuget
+    displayName: 'Pipeline publish NuGet package'
+    artifact: 'nupkg-$(BuildConfiguration)'
