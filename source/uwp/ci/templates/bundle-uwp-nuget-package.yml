@@ -6,8 +6,7 @@ steps:
   - checkout: self
     clean: true
     fetchDepth: 1
-  - task: NuGetToolInstaller@0
-    name: NuGetToolInstaller1
+  - task: NuGetToolInstaller@1
     displayName: Use NuGet 5.x
     inputs:
       versionSpec: 5.x
@@ -36,20 +35,19 @@ steps:
   - task: NuGetCommand@2
     displayName: 'NuGet pack'
     inputs:
-      command: pack
-      packagesToPack: source/uwp/NuGet/AdaptiveCards.Rendering.Uwp.nuspec
-      versioningScheme: byEnvVar
-      versionEnvVar: FullBuildVersion
-      steps:
+      command: 'pack'
+      packagesToPack: 'source/uwp/NuGet/AdaptiveCards.Rendering.Uwp.nuspec'
+      versioningScheme: 'byEnvVar'
+      versionEnvVar: 'FullBuildVersion'
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: Component Detection
   - task: NuGetCommand@2
     displayName: 'NuGet push'
     condition: and(succeeded(), ${{ parameters.performNugetPush }})
     inputs:
-      command: push
+      command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/signed/*.nupkg;!$(Build.ArtifactStagingDirectory)/signed/*.symbols.nupkg'
-      nuGetFeedType: external
+      nuGetFeedType: 'external'
       publishFeedCredentials: 'NuGet.org (AdaptiveCards)'
   - task: PowerShell@1
     displayName: 'Git tag the release'
